@@ -1,3 +1,34 @@
+### Connectify
+
+## Connectify is a Kotlin Multiplatform contacts application designed to manage and store contact information seamlessly across multiple platforms. Utilizing the power of the Room Database, Connectify ensures efficient and robust data persistence.
+Features
+
+Multiplatform Support: Built with Kotlin Multiplatform, Connectify runs smoothly on Android, iOS, and other platforms.
+Room Database Integration: Leverages Room for efficient local data storage and management.
+MVVM Architecture: Implements the Model-View-ViewModel pattern for a clean and maintainable codebase.
+User-Friendly Interface: Provides an intuitive and easy-to-use interface for managing contacts.
+
+Getting Started
+
+  Clone the Repository:
+
+    git clone https://github.com/yourusername/connectify.git
+
+  Open in Android Studio: Import the project into Android Studio.
+  Build and Run: Sync the project with Gradle files and run the app on your preferred device or emulator.
+
+Dependencies
+
+  Kotlin Multiplatform: For cross-platform development.
+  Room Database: For local data storage.
+  Kotlin Coroutines: For asynchronous programming.
+  Jetpack Compose: For building the UI (if applicable).
+
+Contributing
+
+Feel free to fork the repository and submit pull requests. For major changes, please open an issue first to discuss what you would like to change.
+
+
 This is a Kotlin Multiplatform project targeting Android, iOS, Web, Desktop.
 
 * `/composeApp` is for code that will be shared across your Compose Multiplatform applications.
