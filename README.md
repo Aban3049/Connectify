@@ -1,6 +1,6 @@
-### Connectify
+## Connectify
 
-## Connectify is a Kotlin Multiplatform contacts application designed to manage and store contact information seamlessly across multiple platforms. Utilizing the power of the Room Database, Connectify ensures efficient and robust data persistence.
+### Connectify is a Kotlin Multiplatform contacts application designed to manage and store contact information seamlessly across multiple platforms. Utilizing the power of the Room Database, Connectify ensures efficient and robust data persistence.
 Features
 
 Multiplatform Support: Built with Kotlin Multiplatform, Connectify runs smoothly on Android, iOS, and other platforms.
@@ -12,7 +12,7 @@ Getting Started
 
   Clone the Repository:
 
-    git clone https://github.com/yourusername/connectify.git
+    git clone https://github.com/Aban3049/connectify.git
 
   Open in Android Studio: Import the project into Android Studio.
   Build and Run: Sync the project with Gradle files and run the app on your preferred device or emulator.
