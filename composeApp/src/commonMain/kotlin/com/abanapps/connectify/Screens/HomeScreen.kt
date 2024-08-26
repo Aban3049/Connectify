@@ -1,10 +1,13 @@
 package com.abanapps.connectify.Screens
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,6 +22,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -97,48 +101,37 @@ fun HomeScreen(navHostController: NavHostController,viewModel: ViewModelApp) {
                             colors = CardDefaults.cardColors(Color.White),
                         ) {
 
-                            Column(modifier = Modifier.fillMaxWidth().padding(10.dp)) {
-                                Row(modifier = Modifier.fillMaxWidth()) {
+                            Column(modifier = Modifier.fillMaxWidth()) {
+
+                                Row(modifier = Modifier.fillMaxWidth().padding(10.dp), horizontalArrangement = Arrangement.SpaceBetween) {
 
                                     AsyncImage(
                                         imageLoader = imageLoader,
                                         model = it.imageUrl,
                                         placeholder = painterResource(Res.drawable.avatar),
                                         contentDescription = null,
-                                        modifier = Modifier.size(55.dp)
+                                        modifier = Modifier.size(60.dp)
                                     )
 
-                                    Text(it.name)
-
-                                    IconButton(onClick = {
-
-                                        scope.launch(Dispatchers.IO) {
-                                            viewModel.deleteContact(
-                                                Contacts(
-                                                    it.name,
-                                                    it.email,
-                                                    it.phoneNo,
-                                                    it.imageUrl,
-                                                    it.id
-                                                )
-                                            )
-                                        }
-
-                                    }) {
-                                        Icon(
-                                            imageVector = Icons.Default.Delete,
-                                            contentDescription = null
-                                        )
-                                    }
-
+                                    Text(it.name, style = MaterialTheme.typography.bodyLarge, fontSize = 20.sp)
                                 }
-                                Text(it.phoneNo)
+
+                                Spacer(modifier = Modifier.height(10.dp))
+
+                            }
+
+
+                                Row(modifier = Modifier.fillMaxWidth().padding(10.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                                    Text(it.phoneNo, style = MaterialTheme.typography.bodyLarge, fontSize = 20.sp)
+                                    Text(it.id.toString(), style = MaterialTheme.typography.bodyLarge, fontSize = 20.sp)
+                                }
+
                             }
 
 
                         }
 
-                    }
+
 
                 }
             }

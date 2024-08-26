@@ -10,5 +10,5 @@ data class Contacts(
     val phoneNo:String,
     val imageUrl:String,
     @PrimaryKey(autoGenerate = true)
-    val id:Int?=0,
+    val id:Int?=null,
 )
