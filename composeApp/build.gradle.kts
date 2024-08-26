@@ -12,6 +12,8 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
+    kotlin("plugin.serialization") version "2.0.0"
+
 }
 
 kotlin {
@@ -59,6 +61,9 @@ kotlin {
             implementation(libs.coil.compose)
             implementation(libs.room.runtime)
             implementation(libs.sqlite.bundled)
+            implementation(libs.kotlinx.serialization.json)
+            implementation("org.jetbrains.androidx.navigation:navigation-compose:2.8.0-alpha09")
+            implementation(libs.lifecycle.viewmodel.compose)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)

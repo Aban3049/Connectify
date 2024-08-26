@@ -18,6 +18,7 @@ kotlinx-coroutines = "1.8.1"
 calfFilePicker = "0.5.4"
 calfFilePickerCoil = "0.5.1"
 coilCompose = "3.0.0-alpha08"
+kotlinxSerializationJson = "1.7.1"
 room = "2.7.0-alpha04"
 sqlite = "2.5.0-SNAPSHOT"
 ksp = "2.0.0-1.0.21"
@@ -39,6 +40,8 @@ kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-co
 calf-file-picker = { module = "com.mohamedrejeb.calf:calf-file-picker", version.ref = "calfFilePicker" }
 calf-file-picker-coil = { module = "com.mohamedrejeb.calf:calf-file-picker-coil", version.ref = "calfFilePickerCoil" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
