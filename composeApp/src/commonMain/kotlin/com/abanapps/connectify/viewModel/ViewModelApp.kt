@@ -22,11 +22,15 @@ class ViewModelApp(private val repo: Repo) : ViewModel() {
 
     }
 
-    suspend fun deleteContact(contacts: Contacts) = repo.delete(contacts)
+    fun deleteContact(contacts: Contacts) = viewModelScope.launch {
+        repo.delete(contacts)
+    }
 
-    suspend fun insertContact(contacts: Contacts) = repo.insert(contacts)
+    fun insertContact(contacts: Contacts) = viewModelScope.launch { repo.insert(contacts) }
 
-    suspend fun updateContact(contacts: Contacts) = repo.update(contacts)
+    fun updateContact(contacts: Contacts) = viewModelScope.launch {
+        repo.update(contacts)
+    }
 
 
 }

@@ -1,5 +1,6 @@
 package com.abanapps.connectify.Screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,10 +11,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -26,8 +30,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
@@ -39,15 +46,10 @@ import com.mohamedrejeb.calf.picker.FilePickerFileType
 import com.mohamedrejeb.calf.picker.FilePickerSelectionMode
 import com.mohamedrejeb.calf.picker.coil.KmpFileFetcher
 import com.mohamedrejeb.calf.picker.rememberFilePickerLauncher
-import connectify.composeapp.generated.resources.Res
-import connectify.composeapp.generated.resources.avatar
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.painterResource
 
 @Composable
-fun AddContactScreen(viewModelApp: ViewModelApp) {
+fun AddContactScreen(navHostController: NavHostController, viewModelApp: ViewModelApp) {
 
     val phoneNo = remember {
         mutableStateOf("")
@@ -84,9 +86,8 @@ fun AddContactScreen(viewModelApp: ViewModelApp) {
         type = FilePickerFileType.Image,
         selectionMode = FilePickerSelectionMode.Single,
         onResult = { files ->
-            scope.launch(Dispatchers.IO) {
+            scope.launch {
                 files.firstOrNull()?.let {
-//                        byteArray = it.readByteArray(context)
                     platformSpecificFile = it
                     platformSpecificFilePath = it.getPath(context) ?: ""
                 }
@@ -101,7 +102,15 @@ fun AddContactScreen(viewModelApp: ViewModelApp) {
 
     Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
 
-        Text("Add Contact")
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Text("Add Contact", modifier = Modifier)
+            IconButton(onClick = {
+                navHostController.popBackStack()
+            }) {
+                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+            }
+        }
+
 
         Spacer(Modifier.height(15.dp))
 
@@ -109,11 +118,17 @@ fun AddContactScreen(viewModelApp: ViewModelApp) {
 
             Box(modifier = Modifier.size(120.dp)) {
 
+                Spacer(modifier = Modifier.size(120.dp).clip(CircleShape).background(Color.Gray))
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null,
+                    modifier = Modifier.size(80.dp)
+                )
+
                 AsyncImage(
                     imageLoader = imageLoader,
                     model = platformSpecificFile,
-                    placeholder = painterResource(Res.drawable.avatar),
-                    modifier = Modifier.size(120.dp),
+                    modifier = Modifier.size(120.dp).clip(CircleShape),
                     contentScale = ContentScale.Crop,
                     contentDescription = null
                 )
@@ -168,22 +183,26 @@ fun AddContactScreen(viewModelApp: ViewModelApp) {
         Spacer(Modifier.height(10.dp))
 
         Button(onClick = {
-            scope.launch(Dispatchers.IO) {
-                platformSpecificFile?.let {
-                    viewModelApp.insertContact(
-                        Contacts(
-                            name = name.value,
-                            email = email.value,
-                            phoneNo = phoneNo.value,
-                            imageUrl = platformSpecificFilePath
-                        )
+
+            platformSpecificFile?.let {
+                viewModelApp.insertContact(
+                    Contacts(
+                        name = name.value,
+                        email = email.value,
+                        phoneNo = phoneNo.value,
+                        imageUrl = platformSpecificFilePath
                     )
-                }
+                )
             }
+
         }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(10.dp)) {
 
             Text("Save Contact")
         }
+
+        Spacer(modifier = Modifier.height(10.dp))
+        Text(platformSpecificFilePath)
+
 
     }
 

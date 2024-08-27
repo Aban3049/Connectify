@@ -14,7 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -28,7 +28,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,21 +38,15 @@ import coil3.ImageLoader
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import com.abanapps.connectify.Navigation.Routes
-import com.abanapps.connectify.appDatabase.Contacts
 import com.abanapps.connectify.viewModel.ViewModelApp
 import com.mohamedrejeb.calf.picker.coil.KmpFileFetcher
 import connectify.composeapp.generated.resources.Res
 import connectify.composeapp.generated.resources.avatar
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navHostController: NavHostController,viewModel: ViewModelApp) {
-
-    val scope = rememberCoroutineScope()
+fun HomeScreen(navHostController: NavHostController, viewModel: ViewModelApp) {
 
     val contactsList = viewModel._contactsList.collectAsState(initial = emptyList())
 
@@ -65,21 +58,26 @@ fun HomeScreen(navHostController: NavHostController,viewModel: ViewModelApp) {
         FloatingActionButton(onClick = {
 
         }) {
-            Text("+")
+
+            IconButton(onClick = {
+                navHostController.navigate(Routes.AddContactScreen)
+            }) {
+                Icon(imageVector = Icons.Default.Add, contentDescription = null)
+            }
         }
     }, topBar = {
         TopAppBar(title = {
             Text("All Contacts")
         }, actions = {
             IconButton(onClick = {
-                navHostController.navigate(Routes.AddContactScreen)
+
             }) {
                 Icon(imageVector = Icons.Default.Phone, contentDescription = null)
             }
         })
     }) {
 
-        Column(modifier = Modifier.fillMaxSize().padding(12.dp)) {
+        Column(modifier = Modifier.fillMaxSize().padding(12.dp).padding(it)) {
 
             if (contactsList.value.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize()) {
@@ -103,17 +101,26 @@ fun HomeScreen(navHostController: NavHostController,viewModel: ViewModelApp) {
 
                             Column(modifier = Modifier.fillMaxWidth()) {
 
-                                Row(modifier = Modifier.fillMaxWidth().padding(10.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().padding(10.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+
 
                                     AsyncImage(
                                         imageLoader = imageLoader,
                                         model = it.imageUrl,
                                         placeholder = painterResource(Res.drawable.avatar),
                                         contentDescription = null,
-                                        modifier = Modifier.size(60.dp)
+                                        modifier = Modifier.size(40.dp)
                                     )
 
-                                    Text(it.name, style = MaterialTheme.typography.bodyLarge, fontSize = 20.sp)
+
+                                    Text(
+                                        it.name,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontSize = 20.sp
+                                    )
                                 }
 
                                 Spacer(modifier = Modifier.height(10.dp))
@@ -121,16 +128,26 @@ fun HomeScreen(navHostController: NavHostController,viewModel: ViewModelApp) {
                             }
 
 
-                                Row(modifier = Modifier.fillMaxWidth().padding(10.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                                    Text(it.phoneNo, style = MaterialTheme.typography.bodyLarge, fontSize = 20.sp)
-                                    Text(it.id.toString(), style = MaterialTheme.typography.bodyLarge, fontSize = 20.sp)
-                                }
-
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(10.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    it.phoneNo,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontSize = 20.sp
+                                )
+                                Text(
+                                    it.id.toString(),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontSize = 20.sp
+                                )
                             }
-
 
                         }
 
+
+                    }
 
 
                 }

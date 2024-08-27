@@ -16,7 +16,7 @@ fun NavGraph(viewModelApp: ViewModelApp){
 
     NavHost(navController = navController, startDestination = Routes.HomeScreen){
         composable<Routes.AddContactScreen> {
-            AddContactScreen(viewModelApp)
+            AddContactScreen(navController,viewModelApp)
         }
 
         composable<Routes.HomeScreen> {
