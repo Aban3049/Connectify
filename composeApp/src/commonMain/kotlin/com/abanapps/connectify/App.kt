@@ -71,62 +71,62 @@ fun App(db: ContactsDatabase) {
 }
 
 
-@Composable
-fun ImagePicker() {
-    val scope = rememberCoroutineScope()
-    val context = com.mohamedrejeb.calf.core.LocalPlatformContext.current
-
-    var byteArray by remember {
-        mutableStateOf(ByteArray(0))
-    }
-
-    var platformSpecificFilePath by remember {
-        mutableStateOf("")
-    }
-
-    var platformSpecificFile by remember {
-        mutableStateOf<KmpFile?>(null)
-    }
-
-    val pickerLauncher = rememberFilePickerLauncher(
-        type = FilePickerFileType.Image,
-        selectionMode = FilePickerSelectionMode.Multiple,
-        onResult = { files ->
-            scope.launch {
-                files.firstOrNull()?.let {
-//                        byteArray = it.readByteArray(context)
-                    platformSpecificFile = it
-                    platformSpecificFilePath = it.getPath(context) ?: ""
-                }
-            }
-
-        }
-    )
-
-    Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Button(onClick = {
-            pickerLauncher.launch()
-        }, modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-            Text("Open File Picker")
-        }
-
-        val imageLoader = ImageLoader.Builder(LocalPlatformContext.current).components {
-            add(KmpFileFetcher.Factory())
-        }.build()
-
-        AsyncImage(
-            imageLoader = imageLoader,
-            model = platformSpecificFile,
-            modifier = Modifier.size(300.dp),
-            contentScale = ContentScale.Crop,
-            contentDescription = null
-        )
-
-        Text("File Path:  $platformSpecificFilePath", style = MaterialTheme.typography.bodySmall)
-
-
-    }
-}
+//@Composable
+//fun ImagePicker() {
+//    val scope = rememberCoroutineScope()
+//    val context = com.mohamedrejeb.calf.core.LocalPlatformContext.current
+//
+//    var byteArray by remember {
+//        mutableStateOf(ByteArray(0))
+//    }
+//
+//    var platformSpecificFilePath by remember {
+//        mutableStateOf("")
+//    }
+//
+//    var platformSpecificFile by remember {
+//        mutableStateOf<KmpFile?>(null)
+//    }
+//
+//    val pickerLauncher = rememberFilePickerLauncher(
+//        type = FilePickerFileType.Image,
+//        selectionMode = FilePickerSelectionMode.Multiple,
+//        onResult = { files ->
+//            scope.launch {
+//                files.firstOrNull()?.let {
+////                        byteArray = it.readByteArray(context)
+//                    platformSpecificFile = it
+//                    platformSpecificFilePath = it.getPath(context) ?: ""
+//                }
+//            }
+//
+//        }
+//    )
+//
+//    Column(
+//        modifier = Modifier.fillMaxSize().padding(16.dp),
+//        horizontalAlignment = Alignment.CenterHorizontally
+//    ) {
+//        Button(onClick = {
+//            pickerLauncher.launch()
+//        }, modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+//            Text("Open File Picker")
+//        }
+//
+//        val imageLoader = ImageLoader.Builder(LocalPlatformContext.current).components {
+//            add(KmpFileFetcher.Factory())
+//        }.build()
+//
+//        AsyncImage(
+//            imageLoader = imageLoader,
+//            model = platformSpecificFile,
+//            modifier = Modifier.size(300.dp),
+//            contentScale = ContentScale.Crop,
+//            contentDescription = null
+//        )
+//
+//        Text("File Path:  $platformSpecificFilePath", style = MaterialTheme.typography.bodySmall)
+//
+//
+//    }
+//}

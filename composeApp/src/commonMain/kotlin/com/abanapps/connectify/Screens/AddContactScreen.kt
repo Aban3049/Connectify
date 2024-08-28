@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -19,9 +20,12 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -29,11 +33,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
@@ -48,6 +55,7 @@ import com.mohamedrejeb.calf.picker.coil.KmpFileFetcher
 import com.mohamedrejeb.calf.picker.rememberFilePickerLauncher
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddContactScreen(navHostController: NavHostController, viewModelApp: ViewModelApp) {
 
@@ -100,111 +108,137 @@ fun AddContactScreen(navHostController: NavHostController, viewModelApp: ViewMod
         add(KmpFileFetcher.Factory())
     }.build()
 
-    Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+    Scaffold(topBar = {
 
-        Row(modifier = Modifier.fillMaxWidth()) {
-            Text("Add Contact", modifier = Modifier)
+        CenterAlignedTopAppBar(title = {
+            Text(
+                "Add Contacts",
+                fontWeight = FontWeight.Bold,
+                fontSize = 22.sp,
+            )
+        }, navigationIcon = {
             IconButton(onClick = {
                 navHostController.popBackStack()
             }) {
-                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
-            }
-        }
-
-
-        Spacer(Modifier.height(15.dp))
-
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-
-            Box(modifier = Modifier.size(120.dp)) {
-
-                Spacer(modifier = Modifier.size(120.dp).clip(CircleShape).background(Color.Gray))
                 Icon(
-                    imageVector = Icons.Default.Person,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = null,
-                    modifier = Modifier.size(80.dp)
+                    modifier = Modifier.size(28.dp)
                 )
+            }
+        })
+    })
 
-                AsyncImage(
-                    imageLoader = imageLoader,
-                    model = platformSpecificFile,
-                    modifier = Modifier.size(120.dp).clip(CircleShape),
-                    contentScale = ContentScale.Crop,
-                    contentDescription = null
-                )
-                IconButton(onClick = {
-                    pickerLauncher.launch()
+    {
 
-                }) {
+        Column(
+            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(it)
+                .padding(start = 14.dp, end = 14.dp)
+        ) {
+
+
+
+            Spacer(Modifier.height(10.dp))
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+
+                Box(modifier = Modifier.size(120.dp), contentAlignment = Alignment.Center) {
+
+                    Spacer(
+                        modifier = Modifier.size(120.dp).clip(CircleShape).background(Color.Gray)
+                    )
                     Icon(
-                        imageVector = Icons.Default.Add,
+                        imageVector = Icons.Default.Person,
                         contentDescription = null,
-                        modifier = Modifier.size(30.dp),
+                        modifier = Modifier.size(80.dp),
+                        tint = Color.White
+                    )
+
+                    AsyncImage(
+                        imageLoader = imageLoader,
+                        model = platformSpecificFile,
+                        modifier = Modifier.size(120.dp).clip(CircleShape),
+                        contentScale = ContentScale.Crop,
+                        contentDescription = null
+                    )
+                    IconButton(onClick = {
+                        pickerLauncher.launch()
+
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = null,
+                            modifier = Modifier.size(30.dp),
+                            tint = Color.White
+                        )
+                    }
+
+                }
+
+
+            }
+
+            Spacer(Modifier.height(10.dp))
+
+            OutlinedTextField(
+                value = name.value,
+                onValueChange = { name.value = it },
+                label = { Text("Name") }, modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(Modifier.height(10.dp))
+
+            OutlinedTextField(
+                value = phoneNo.value,
+                onValueChange = { phoneNo.value = it },
+                label = { Text("Ph No") }, modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(Modifier.height(10.dp))
+
+            OutlinedTextField(
+                value = email.value,
+                onValueChange = { email.value = it },
+                label = { Text("Email") }, modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(Modifier.height(10.dp))
+
+            OutlinedTextField(
+                value = address.value,
+                onValueChange = { address.value = it },
+                label = { Text("Address") }, modifier = Modifier.fillMaxWidth(),
+
+                )
+
+            Spacer(Modifier.height(10.dp))
+
+            Button(onClick = {
+
+                platformSpecificFile?.let {
+                    viewModelApp.insertContact(
+                        Contacts(
+                            name = name.value,
+                            email = email.value,
+                            phoneNo = phoneNo.value,
+                            imageUrl = platformSpecificFilePath
+                        )
                     )
                 }
 
+            }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp)) {
+
+                Text("Save Contact")
             }
+
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(platformSpecificFilePath)
 
 
         }
-
-        Spacer(Modifier.height(10.dp))
-
-        OutlinedTextField(
-            value = name.value,
-            onValueChange = { name.value = it },
-            label = { Text("Name") }, modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(Modifier.height(10.dp))
-
-        OutlinedTextField(
-            value = phoneNo.value,
-            onValueChange = { phoneNo.value = it },
-            label = { Text("Ph No") }, modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(Modifier.height(10.dp))
-
-        OutlinedTextField(
-            value = email.value,
-            onValueChange = { email.value = it },
-            label = { Text("Email") }, modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(Modifier.height(10.dp))
-
-        OutlinedTextField(
-            value = address.value,
-            onValueChange = { address.value = it },
-            label = { Text("Address") }, modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(Modifier.height(10.dp))
-
-        Button(onClick = {
-
-            platformSpecificFile?.let {
-                viewModelApp.insertContact(
-                    Contacts(
-                        name = name.value,
-                        email = email.value,
-                        phoneNo = phoneNo.value,
-                        imageUrl = platformSpecificFilePath
-                    )
-                )
-            }
-
-        }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(10.dp)) {
-
-            Text("Save Contact")
-        }
-
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(platformSpecificFilePath)
-
 
     }
+
 
 }
 
