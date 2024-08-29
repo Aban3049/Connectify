@@ -8,6 +8,7 @@ data class Contacts(
     val name:String,
     val email:String,
     val phoneNo:String,
+    val address:String,
     val imageUrl:String,
     @PrimaryKey(autoGenerate = true)
     val id:Int?=null,

@@ -13,6 +13,8 @@ class ViewModelApp(private val repo: Repo) : ViewModel() {
     private val contactList = MutableStateFlow<List<Contacts>>(emptyList())
     val _contactsList = contactList.asStateFlow()
 
+    val isLoading = MutableStateFlow(false)
+
     init {
         viewModelScope.launch {
             repo.getAllContacts().collect {
@@ -26,7 +28,12 @@ class ViewModelApp(private val repo: Repo) : ViewModel() {
         repo.delete(contacts)
     }
 
-    fun insertContact(contacts: Contacts) = viewModelScope.launch { repo.insert(contacts) }
+    fun insertContact(contacts: Contacts) = viewModelScope.launch {
+        isLoading.value = true
+        repo.insert(contacts)
+    }.invokeOnCompletion {
+        isLoading.value = false
+    }
 
     fun updateContact(contacts: Contacts) = viewModelScope.launch {
         repo.update(contacts)

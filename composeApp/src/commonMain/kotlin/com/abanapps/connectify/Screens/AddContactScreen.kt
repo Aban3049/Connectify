@@ -18,16 +18,20 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,6 +49,7 @@ import androidx.navigation.NavHostController
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
+import com.abanapps.connectify.Utils.TextField
 import com.abanapps.connectify.appDatabase.Contacts
 import com.abanapps.connectify.viewModel.ViewModelApp
 import com.mohamedrejeb.calf.io.KmpFile
@@ -78,6 +83,8 @@ fun AddContactScreen(navHostController: NavHostController, viewModelApp: ViewMod
     val imageUrl = remember {
         mutableStateOf("")
     }
+
+    val isLoading = viewModelApp.isLoading.collectAsState()
 
     val scope = rememberCoroutineScope()
     val context = com.mohamedrejeb.calf.core.LocalPlatformContext.current
@@ -129,13 +136,13 @@ fun AddContactScreen(navHostController: NavHostController, viewModelApp: ViewMod
         })
     })
 
-    {
+    { innerPadding ->
 
         Column(
-            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(it)
+            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+                .padding(innerPadding)
                 .padding(start = 14.dp, end = 14.dp)
         ) {
-
 
 
             Spacer(Modifier.height(10.dp))
@@ -180,36 +187,43 @@ fun AddContactScreen(navHostController: NavHostController, viewModelApp: ViewMod
 
             Spacer(Modifier.height(10.dp))
 
-            OutlinedTextField(
+            TextField(
                 value = name.value,
                 onValueChange = { name.value = it },
-                label = { Text("Name") }, modifier = Modifier.fillMaxWidth()
+                label = "Name",
+                placeHolder = "Enter Name",
+                Icon = Icons.Default.Person
             )
 
             Spacer(Modifier.height(10.dp))
 
-            OutlinedTextField(
+            TextField(
                 value = phoneNo.value,
                 onValueChange = { phoneNo.value = it },
-                label = { Text("Ph No") }, modifier = Modifier.fillMaxWidth()
+                label = "Ph No",
+                placeHolder = "Enter Phone No",
+                Icons.Default.Phone
             )
 
             Spacer(Modifier.height(10.dp))
 
-            OutlinedTextField(
+            TextField(
                 value = email.value,
                 onValueChange = { email.value = it },
-                label = { Text("Email") }, modifier = Modifier.fillMaxWidth()
+                label = "Email",
+                placeHolder = "Enter Email",
+                Icon = Icons.Default.Email
             )
 
             Spacer(Modifier.height(10.dp))
 
-            OutlinedTextField(
+            TextField(
                 value = address.value,
                 onValueChange = { address.value = it },
-                label = { Text("Address") }, modifier = Modifier.fillMaxWidth(),
-
-                )
+                label = "Address",
+                placeHolder = "Enter Address",
+                Icon = Icons.Default.MailOutline
+            )
 
             Spacer(Modifier.height(10.dp))
 
@@ -221,14 +235,19 @@ fun AddContactScreen(navHostController: NavHostController, viewModelApp: ViewMod
                             name = name.value,
                             email = email.value,
                             phoneNo = phoneNo.value,
+                            address = address.value,
                             imageUrl = platformSpecificFilePath
                         )
                     )
                 }
 
             }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp)) {
+                if (isLoading.value){
+                    CircularProgressIndicator(color = Color.White)
+                }else{
+                    Text("Save Contact")
+                }
 
-                Text("Save Contact")
             }
 
             Spacer(modifier = Modifier.height(10.dp))
