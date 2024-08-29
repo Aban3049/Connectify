@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
@@ -222,7 +223,7 @@ fun AddContactScreen(navHostController: NavHostController, viewModelApp: ViewMod
                 onValueChange = { address.value = it },
                 label = "Address",
                 placeHolder = "Enter Address",
-                Icon = Icons.Default.MailOutline
+                Icon = Icons.Default.LocationOn
             )
 
             Spacer(Modifier.height(10.dp))
