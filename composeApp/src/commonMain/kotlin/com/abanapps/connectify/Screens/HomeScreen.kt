@@ -67,7 +67,9 @@ import com.abanapps.connectify.viewModel.ViewModelApp
 import com.mohamedrejeb.calf.picker.coil.KmpFileFetcher
 import connectify.composeapp.generated.resources.Res
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kottieComposition.KottieCompositionSpec
 import kottieComposition.animateKottieCompositionAsState
@@ -100,10 +102,8 @@ fun HomeScreen(navHostController: NavHostController, viewModel: ViewModelApp) {
     val composition = rememberKottieComposition(
         spec = KottieCompositionSpec.JsonString(animation)
     )
-    // Control the playback of the animation
     val playing by remember { mutableStateOf(true) }
 
-    // Observe the animation state and loop indefinitely
     val animationState by animateKottieCompositionAsState(
         composition = composition,
         isPlaying = playing,

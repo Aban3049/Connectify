@@ -175,7 +175,7 @@ fun AddContactScreen(navHostController: NavHostController, viewModelApp: ViewMod
                     FloatingActionButton(
                         onClick = { pickerLauncher.launch() },
                         modifier = Modifier.offset {
-                            IntOffset(x = 30, y = 20)
+                            IntOffset(x = 40, y = 35)
                         }.clip(CircleShape), containerColor = Color.Black) {
                         Icon(
                             imageVector = Icons.Default.Add,
