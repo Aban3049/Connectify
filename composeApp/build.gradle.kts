@@ -64,6 +64,7 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation("org.jetbrains.androidx.navigation:navigation-compose:2.8.0-alpha09")
             implementation(libs.lifecycle.viewmodel.compose)
+            implementation("io.github.ismai117:kottie:1.9.6")
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)

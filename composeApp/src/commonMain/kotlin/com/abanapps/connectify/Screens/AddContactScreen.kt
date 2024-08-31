@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -20,13 +21,13 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -44,6 +45,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -169,10 +171,12 @@ fun AddContactScreen(navHostController: NavHostController, viewModelApp: ViewMod
                         contentScale = ContentScale.Crop,
                         contentDescription = null
                     )
-                    IconButton(onClick = {
-                        pickerLauncher.launch()
 
-                    }) {
+                    FloatingActionButton(
+                        onClick = { pickerLauncher.launch() },
+                        modifier = Modifier.offset {
+                            IntOffset(x = 30, y = 20)
+                        }.clip(CircleShape), containerColor = Color.Black) {
                         Icon(
                             imageVector = Icons.Default.Add,
                             contentDescription = null,
@@ -243,9 +247,9 @@ fun AddContactScreen(navHostController: NavHostController, viewModelApp: ViewMod
                 }
 
             }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp)) {
-                if (isLoading.value){
+                if (isLoading.value) {
                     CircularProgressIndicator(color = Color.White)
-                }else{
+                } else {
                     Text("Save Contact")
                 }
 

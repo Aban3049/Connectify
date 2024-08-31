@@ -1,5 +1,6 @@
 package com.abanapps.connectify.Screens
 
+import KottieAnimation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -37,12 +38,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,13 +65,52 @@ import com.abanapps.connectify.Navigation.Routes
 import com.abanapps.connectify.appDatabase.Contacts
 import com.abanapps.connectify.viewModel.ViewModelApp
 import com.mohamedrejeb.calf.picker.coil.KmpFileFetcher
+import connectify.composeapp.generated.resources.Res
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.launch
+import kottieComposition.KottieCompositionSpec
+import kottieComposition.animateKottieCompositionAsState
+import kottieComposition.rememberKottieComposition
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import utils.KottieConstants
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalResourceApi::class)
 @Composable
 fun HomeScreen(navHostController: NavHostController, viewModel: ViewModelApp) {
 
     val contactsList by viewModel._contactsList.collectAsState(initial = emptyList())
     val updatingContact = remember { mutableStateOf(false) }
+
+    val searchBar = remember {
+        mutableStateOf(false)
+    }
+
+    val query = remember {
+        mutableStateOf("")
+    }
+
+    var animation by remember { mutableStateOf("") }
+
+
+    LaunchedEffect(Unit) {
+            animation = Res.readBytes("drawable/contact.json").decodeToString()
+    }
+
+    val composition = rememberKottieComposition(
+        spec = KottieCompositionSpec.JsonString(animation)
+    )
+    // Control the playback of the animation
+    val playing by remember { mutableStateOf(true) }
+
+    // Observe the animation state and loop indefinitely
+    val animationState by animateKottieCompositionAsState(
+        composition = composition,
+        isPlaying = playing,
+        iterations = KottieConstants.IterateForever,
+        speed = 1f
+    )
+
 
     Scaffold(
         floatingActionButton = {
@@ -81,7 +124,9 @@ fun HomeScreen(navHostController: NavHostController, viewModel: ViewModelApp) {
             CenterAlignedTopAppBar(
                 title = { Text("Contacts", fontWeight = FontWeight.Bold, fontSize = 22.sp) },
                 navigationIcon = {
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = {
+
+                    }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.List,
                             contentDescription = "Menu",
@@ -90,7 +135,9 @@ fun HomeScreen(navHostController: NavHostController, viewModel: ViewModelApp) {
                     }
                 },
                 actions = {
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = {
+                        searchBar.value = !searchBar.value
+                    }) {
                         Icon(
                             imageVector = Icons.Default.Search,
                             contentDescription = "Search",
@@ -103,13 +150,61 @@ fun HomeScreen(navHostController: NavHostController, viewModel: ViewModelApp) {
     ) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues).padding(12.dp)) {
             if (contactsList.isEmpty()) {
-                EmptyContactsMessage()
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    KottieAnimation(
+                        composition = composition,
+                        progress = { animationState.progress },
+                        modifier = Modifier.size(300.dp)
+                    )
+                }
+
             } else {
-                ContactsList(contactsList, viewModel, updatingContact)
+                if (searchBar.value) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        elevation = CardDefaults.cardElevation(0.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(Color.White)
+                    ) {
+                        androidx.compose.material3.TextField(
+                            query.value,
+                            onValueChange = { query.value = it },
+                            placeholder = {
+                                Text("Search")
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = null,
+                                    tint = Color.Black
+                                )
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = TextFieldDefaults.colors(
+                                unfocusedIndicatorColor = Color.Transparent,
+                                focusedIndicatorColor = Color.Transparent,
+                                focusedContainerColor = Color.Transparent,
+                                unfocusedContainerColor = Color.Transparent
+
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                }
+                val contactList = if (query.value.isEmpty()) {
+                    contactsList
+                } else {
+                    contactsList.filter { it.name.contains(query.value, ignoreCase = true) }
+                }
+                ContactsList(contactList, viewModel, updatingContact)
             }
         }
     }
 }
+
 
 @Composable
 fun EmptyContactsMessage() {
@@ -140,6 +235,7 @@ fun ContactCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(bottom = 10.dp)
             .clickable { updatingContact.value = true },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(12.dp),
@@ -193,12 +289,12 @@ fun ContactAvatar(contact: Contacts) {
 
     Box(contentAlignment = Alignment.Center) {
         if (contact.imageUrl.isEmpty()) {
-        Spacer(
-            modifier = Modifier
-                .size(60.dp)
-                .background(randomColorGenerator(), shape = CircleShape)
-        )
-        Text(contact.name.first().toString(), fontSize = 25.sp, color = Color.White)
+            Spacer(
+                modifier = Modifier
+                    .size(60.dp)
+                    .background(randomColorGenerator(), shape = CircleShape)
+            )
+            Text(contact.name.first().toString(), fontSize = 25.sp, color = Color.White)
         } else {
             AsyncImage(
                 imageLoader = imageLoader,
