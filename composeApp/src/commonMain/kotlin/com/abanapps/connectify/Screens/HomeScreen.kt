@@ -46,7 +46,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,11 +65,6 @@ import com.abanapps.connectify.appDatabase.Contacts
 import com.abanapps.connectify.viewModel.ViewModelApp
 import com.mohamedrejeb.calf.picker.coil.KmpFileFetcher
 import connectify.composeapp.generated.resources.Res
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
 import kottieComposition.KottieCompositionSpec
 import kottieComposition.animateKottieCompositionAsState
 import kottieComposition.rememberKottieComposition
@@ -82,7 +76,8 @@ import utils.KottieConstants
 fun HomeScreen(navHostController: NavHostController, viewModel: ViewModelApp) {
 
     val contactsList by viewModel._contactsList.collectAsState(initial = emptyList())
-    val updatingContact = remember { mutableStateOf(false) }
+
+    var selectedContact by remember { mutableStateOf<Contacts?>(null) }
 
     val searchBar = remember {
         mutableStateOf(false)
@@ -96,13 +91,16 @@ fun HomeScreen(navHostController: NavHostController, viewModel: ViewModelApp) {
 
 
     LaunchedEffect(Unit) {
-            animation = Res.readBytes("drawable/contact.json").decodeToString()
+        animation = Res.readBytes("drawable/contact.json").decodeToString()
     }
+
 
     val composition = rememberKottieComposition(
         spec = KottieCompositionSpec.JsonString(animation)
     )
+
     val playing by remember { mutableStateOf(true) }
+
 
     val animationState by animateKottieCompositionAsState(
         composition = composition,
@@ -110,6 +108,8 @@ fun HomeScreen(navHostController: NavHostController, viewModel: ViewModelApp) {
         iterations = KottieConstants.IterateForever,
         speed = 1f
     )
+
+
 
 
     Scaffold(
@@ -199,9 +199,16 @@ fun HomeScreen(navHostController: NavHostController, viewModel: ViewModelApp) {
                 } else {
                     contactsList.filter { it.name.contains(query.value, ignoreCase = true) }
                 }
-                ContactsList(contactList, viewModel, updatingContact)
+                ContactsList(contactList, viewModel, onContactClick = { contact ->
+                    selectedContact = contact
+                })
             }
         }
+    }
+    selectedContact?.let { contact ->
+        UpdateContactBottomSheet(contact, viewModel, onDismissRequest = {
+            null
+        })
     }
 }
 
@@ -217,11 +224,11 @@ fun EmptyContactsMessage() {
 fun ContactsList(
     contacts: List<Contacts>,
     viewModel: ViewModelApp,
-    updatingContact: MutableState<Boolean>
+    onContactClick: (Contacts) -> Unit
 ) {
     LazyColumn {
         items(contacts) { contact ->
-            ContactCard(contact, viewModel, updatingContact)
+            ContactCard(contact, viewModel, onContactClick)
         }
     }
 }
@@ -230,29 +237,19 @@ fun ContactsList(
 fun ContactCard(
     contact: Contacts,
     viewModel: ViewModelApp,
-    updatingContact: MutableState<Boolean>
+    onContactClicked: (Contacts) -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 10.dp)
-            .clickable { updatingContact.value = true },
+            .clickable {
+                onContactClicked(contact)
+            },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(12.dp),
         colors = CardDefaults.cardColors(Color.White)
     ) {
-        if (updatingContact.value) {
-            UpdateContactBottomSheet(
-                id = contact.id ?: return@Card,
-                contactName = contact.name,
-                contactPhoneNo = contact.phoneNo,
-                contactEmail = contact.email,
-                contactAddress = contact.address,
-                imageUrl = contact.imageUrl,
-                viewModel = viewModel,
-                bottomSheetState = updatingContact.value
-            )
-        }
 
         ContactCardContent(contact, viewModel)
     }
@@ -312,39 +309,32 @@ fun ContactAvatar(contact: Contacts) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UpdateContactBottomSheet(
-    id: Int,
-    contactName: String,
-    contactPhoneNo: String,
-    contactEmail: String,
-    contactAddress: String,
-    imageUrl: String,
+    contact: Contacts,
     viewModel: ViewModelApp,
-    bottomSheetState: Boolean
+    onDismissRequest: () -> Unit
 ) {
-    val name = remember { mutableStateOf(contactName) }
-    val phoneNo = remember { mutableStateOf(contactPhoneNo) }
-    val email = remember { mutableStateOf(contactEmail) }
-    val address = remember { mutableStateOf(contactAddress) }
-    val imageUrlState = remember { mutableStateOf(imageUrl) }
+    val name = remember { mutableStateOf(contact.name) }
+    val phoneNo = remember { mutableStateOf(contact.phoneNo) }
+    val email = remember { mutableStateOf(contact.email) }
+    val address = remember { mutableStateOf(contact.address) }
+    val imageUrl = remember { mutableStateOf(contact.imageUrl) }
 
-    var showBottomSheet by remember { mutableStateOf(bottomSheetState) }
 
-    if (showBottomSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showBottomSheet = false }
-        ) {
-            UpdateContactForm(
-                id = id,
-                name = name,
-                phoneNo = phoneNo,
-                email = email,
-                address = address,
-                imageUrlState = imageUrlState,
-                viewModel = viewModel,
-                onClose = { showBottomSheet = false }
-            )
-        }
+    ModalBottomSheet(
+        onDismissRequest = { onDismissRequest() }
+    ) {
+        UpdateContactForm(
+            id = contact.id ?: return@ModalBottomSheet,
+            name = name,
+            phoneNo = phoneNo,
+            email = email,
+            address = address,
+            imageUrlState = imageUrl,
+            viewModel = viewModel,
+            onClose = onDismissRequest
+        )
     }
+
 }
 
 @Composable
@@ -409,302 +399,3 @@ fun randomColorGenerator(): Color {
     )
 }
 
-//fun HomeScreen(navHostController: NavHostController, viewModel: ViewModelApp) {
-//
-//    val contactsList = viewModel._contactsList.collectAsState(initial = emptyList())
-//
-//    val imageLoader = ImageLoader.Builder(LocalPlatformContext.current).components {
-//        add(KmpFileFetcher.Factory())
-//    }.build()
-//
-//    val updatingContact = remember {
-//        mutableStateOf(false)
-//    }
-//
-//    Scaffold(floatingActionButton = {
-//        FloatingActionButton(onClick = {
-//
-//        }) {
-//
-//            IconButton(onClick = {
-//                navHostController.navigate(Routes.AddContactScreen)
-//            }) {
-//                Icon(imageVector = Icons.Default.Add, contentDescription = null)
-//            }
-//        }
-//    },
-//        topBar = {
-//            CenterAlignedTopAppBar(title = {
-//                Text(
-//                    "Contacts",
-//                    fontWeight = FontWeight.Bold,
-//                    fontSize = 22.sp,
-//                )
-//            }, navigationIcon = {
-//                IconButton(onClick = {
-//
-//                }) {
-//                    Icon(
-//                        imageVector = Icons.AutoMirrored.Filled.List,
-//                        contentDescription = null,
-//                        modifier = Modifier.size(28.dp)
-//                    )
-//                }
-//            }, actions =
-//            {
-//                IconButton(onClick = {
-//
-//                }) {
-//                    Icon(
-//                        imageVector = Icons.Default.Search,
-//                        contentDescription = null,
-//                        modifier = Modifier.size(28.dp)
-//                    )
-//                }
-//            })
-//
-//        }) {
-//        Column(modifier = Modifier.fillMaxSize().padding(12.dp).padding(it)) {
-//
-//            if (contactsList.value.isEmpty()) {
-//                Box(modifier = Modifier.fillMaxSize()) {
-//                    Text(
-//                        "No Contacts",
-//                        modifier = Modifier.align(Alignment.Center),
-//                        fontSize = 22.sp
-//                    )
-//                }
-//            } else {
-//                LazyColumn {
-//
-//                    items(contactsList.value) {
-//
-//                        Card(
-//                            modifier = Modifier.fillMaxWidth()
-//                                .clickable {
-//                                    updatingContact.value = true
-//                                },
-//                            shape = RoundedCornerShape(12.dp),
-//                            elevation = CardDefaults.cardElevation(12.dp),
-//                            colors = CardDefaults.cardColors(Color.White),
-//                        ) {
-//
-//                            if (updatingContact.value) {
-//                                UpdateContactBottomSheet(
-//                                    id = it.id!!,
-//                                    contactName = it.name,
-//                                    contactPhoneNo = it.phoneNo,
-//                                    contactEmail = it.email,
-//                                    contactAddress = it.address,
-//                                    imageUrl = it.imageUrl,
-//                                    viewModel = viewModel,
-//                                    bottomSheetState = updatingContact.value
-//                                )
-//                            }
-//
-//                            Column(modifier = Modifier.fillMaxWidth()) {
-//
-//                                Row(
-//                                    modifier = Modifier.fillMaxWidth().padding(10.dp),
-//                                    verticalAlignment = Alignment.CenterVertically
-//                                ) {
-//
-//                                    Box(contentAlignment = Alignment.Center) {
-//
-////                                        if (it.imageUrl.isEmpty()) {
-//                                        Spacer(
-//                                            modifier = Modifier.size(60.dp).background(
-//                                                randomColorGenerator(),
-//                                                shape = CircleShape
-//                                            )
-//                                        )
-//
-//                                        Text(
-//                                            it.name.first().toString(),
-//                                            fontSize = 25.sp,
-//                                            color = Color.White
-//                                        )
-//
-////                                        } else {
-////                                            AsyncImage(
-////                                                imageLoader = imageLoader,
-////                                                model = it.imageUrl,
-////                                                contentDescription = null,
-////                                                modifier = Modifier.size(50.dp).clip(CircleShape),
-////                                                contentScale = ContentScale.Crop
-////                                            )
-////                                        }
-//
-//                                    }
-//
-//                                    Spacer(modifier = Modifier.width(10.dp))
-//
-//                                    Text(
-//                                        it.name,
-//                                        style = MaterialTheme.typography.bodyLarge,
-//                                        fontSize = 20.sp
-//                                    )
-//
-//                                    Spacer(modifier = Modifier.weight(1f))
-//
-//                                    IconButton(onClick = {
-//                                        viewModel.deleteContact(
-//                                            Contacts(
-//                                                it.name,
-//                                                it.email,
-//                                                it.phoneNo,
-//                                                it.imageUrl,
-//                                                it.address,
-//                                                it.id
-//                                            )
-//                                        )
-//                                    }) {
-//                                        Icon(
-//                                            imageVector = Icons.Default.Delete,
-//                                            contentDescription = null
-//                                        )
-//                                    }
-//
-//                                }
-//                            }
-//
-//                        }
-//
-//
-//                    }
-//
-//
-//                }
-//            }
-//
-//
-//        }
-//    }
-//
-//}
-//
-//@OptIn(ExperimentalMaterial3Api::class)
-//@Composable
-//fun UpdateContactBottomSheet(
-//    id: Int,
-//    contactName: String,
-//    contactPhoneNo: String,
-//    contactEmail: String,
-//    contactAddress: String,
-//    imageUrl: String,
-//    viewModel: ViewModelApp,
-//    bottomSheetState: Boolean
-//) {
-//
-//    val name = remember {
-//        mutableStateOf(contactName)
-//    }
-//
-//    val phoneNo = remember {
-//        mutableStateOf(contactPhoneNo)
-//    }
-//
-//    val email = remember {
-//        mutableStateOf(contactEmail)
-//    }
-//
-//    val address = remember {
-//        mutableStateOf(contactAddress)
-//    }
-//
-//    val imageUrlState = remember {
-//        mutableStateOf(imageUrl)
-//    }
-//
-//    val sheetState = rememberModalBottomSheetState()
-//    var showBottomSheet by remember {
-//        mutableStateOf(bottomSheetState)
-//    }
-//
-//    if (showBottomSheet) {
-//
-//        ModalBottomSheet(sheetState = sheetState, onDismissRequest = {
-//            showBottomSheet = false
-//        }) {
-//
-//            Column(
-//                modifier = Modifier.fillMaxWidth(),
-//                horizontalAlignment = Alignment.CenterHorizontally
-//            ) {
-//
-//                Text("Update Contact", fontSize = 19.sp, color = Color.Black)
-//
-//                Spacer(modifier = Modifier.height(15.dp))
-//
-//                TextField(
-//                    value = name.value,
-//                    onValueChange = { name.value = it },
-//                    label = "Name",
-//                    placeHolder = "Enter Name",
-//                    Icon = Icons.Default.Person
-//                )
-//
-//                Spacer(Modifier.height(10.dp))
-//
-//                TextField(
-//                    value = phoneNo.value,
-//                    onValueChange = { phoneNo.value = it },
-//                    label = "Ph No",
-//                    placeHolder = "Enter Phone No",
-//                    Icons.Default.Phone
-//                )
-//
-//                Spacer(Modifier.height(10.dp))
-//
-//                TextField(
-//                    value = email.value,
-//                    onValueChange = { email.value = it },
-//                    label = "Email",
-//                    placeHolder = "Enter Email",
-//                    Icon = Icons.Default.Email
-//                )
-//
-//                Spacer(Modifier.height(10.dp))
-//
-//                TextField(
-//                    value = address.value,
-//                    onValueChange = { address.value = it },
-//                    label = "Address",
-//                    placeHolder = "Enter Address",
-//                    Icon = Icons.Default.MailOutline
-//                )
-//
-//                Button(onClick = {
-//                    viewModel.updateContact(
-//                        Contacts(
-//                            name = name.value,
-//                            email = email.value,
-//                            phoneNo = phoneNo.value,
-//                            imageUrl = imageUrlState.value,
-//                            address = address.value,
-//                            id = id
-//                        )
-//                    )
-//                }) {
-//                    Text("Update Contact")
-//                }
-//
-//
-//            }
-//
-//        }
-//
-//
-//    }
-//
-//
-//}
-//
-//
-//fun randomColorGenerator(): Color {
-//    return Color(
-//        red = (0..255).random(),
-//        green = (0..255).random(),
-//        blue = (0..255).random()
-//    )
-//}
