@@ -110,8 +110,6 @@ fun HomeScreen(navHostController: NavHostController, viewModel: ViewModelApp) {
     )
 
 
-
-
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(onClick = {

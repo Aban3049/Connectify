@@ -62,9 +62,9 @@ kotlin {
             implementation(libs.room.runtime)
             implementation(libs.sqlite.bundled)
             implementation(libs.kotlinx.serialization.json)
-            implementation("org.jetbrains.androidx.navigation:navigation-compose:2.8.0-alpha09")
+            implementation(libs.navigation.compose)
             implementation(libs.lifecycle.viewmodel.compose)
-            implementation("io.github.ismai117:kottie:1.9.6")
+            implementation(libs.kottie)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
